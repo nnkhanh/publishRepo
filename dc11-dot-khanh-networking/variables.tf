@@ -1,7 +1,7 @@
 variable "prefix" {
-  	default = "mynetworkingttf"
+  	default = "mynetworkingttf1"
 }
 
 variable "location" {
-	default = "southeastasia"
+  	default = "southeastasia"
 }
