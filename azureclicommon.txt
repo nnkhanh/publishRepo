@@ -1,0 +1,5 @@
+sudo journalctl -u jenkins
+systemctl status jenkins
+
+
+ansible-playbook -i inventory/hosts.yml site.yml --ask-become-pass

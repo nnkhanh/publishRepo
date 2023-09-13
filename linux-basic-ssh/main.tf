@@ -74,7 +74,7 @@ resource "azurerm_linux_virtual_machine" "main" {
   name                            = "${var.prefix}-vm"
   resource_group_name             = azurerm_resource_group.main.name
   location                        = azurerm_resource_group.main.location
-  size                            = "Standard_D1_v2"
+  size                            = "Standard_DS1_v2"
   admin_username                  = "azureuser"
   network_interface_ids = [
     azurerm_network_interface.main.id,
@@ -82,18 +82,19 @@ resource "azurerm_linux_virtual_machine" "main" {
 
   admin_ssh_key {
     username = "azureuser"
-    public_key = file("~/.ssh/nnkhanh-GitHub.pub")
+    public_key = file("~/.ssh/azure_key.pub")
   }
 
   source_image_reference {
     publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts-gen2"
     version   = "latest"
   }
 
   os_disk {
     storage_account_type = "Standard_LRS"
     caching              = "ReadWrite"
+    disk_size_gb         = "64"
   }
 }

@@ -1,0 +1,42 @@
+---
+- name: install wget
+  ansible.builtin.package:
+    name: wget
+    state: present
+
+- name: install openjdk
+  ansible.builtin.apt:
+    name: openjdk-11-jdk
+    state: present
+    update_cache: yes
+
+- name: Configure apt key for jenkins repository
+  action: apt_key url=https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key state=present
+
+- name: Add jenkins APT repository
+  action: apt_repository repo='deb https://pkg.jenkins.io/debian-stable binary/' state=present
+
+- name: install jenkins
+  ansible.builtin.apt:
+    name: jenkins
+    state: present
+    update_cache: yes
+
+- name: start jenkins
+  systemd:
+    name: jenkins
+    state: started
+
+- name: enable jenkins
+  systemd:
+    name: jenkins
+    enabled: true
+
+- name: init password jenkin
+  shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+  changed_when: false
+  register: result
+
+- name: print init password jenkins
+  debug:
+    var: result.stdout
