@@ -6,3 +6,4 @@
   tasks:
   - import_role:
       name: jenkins
+...

@@ -1,6 +1,6 @@
 ---
 - name: install wget
-  ansible.builtin.package:
+  ansible.builtin.apt:
     name: wget
     state: present
 
@@ -11,10 +11,10 @@
     update_cache: yes
 
 - name: Configure apt key for jenkins repository
-  action: apt_key url=https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key state=present
+  action: apt_key url={{ jenkinkey }} state=present
 
 - name: Add jenkins APT repository
-  action: apt_repository repo='deb https://pkg.jenkins.io/debian-stable binary/' state=present
+  action: apt_repository repo={{ jenkinrepo }} state=present
 
 - name: install jenkins
   ansible.builtin.apt:
@@ -40,3 +40,4 @@
 - name: print init password jenkins
   debug:
     var: result.stdout
+...

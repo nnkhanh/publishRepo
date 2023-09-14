@@ -44,15 +44,14 @@ resource "azurerm_network_interface" "main" {
   }
 }
 
-
 resource "azurerm_network_security_group" "main" {
   name                = "${var.prefix}-nsg"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
 }
 
-resource "azurerm_network_security_rule" "main" {
-  name                        = "${var.prefix}-nsgrule"
+resource "azurerm_network_security_rule" "sshrule" {
+  name                        = "${var.prefix}-nsgrule22"
   network_security_group_name = azurerm_network_security_group.main.name
   resource_group_name = azurerm_resource_group.main.name
   priority                    = 100
@@ -61,6 +60,20 @@ resource "azurerm_network_security_rule" "main" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+}
+
+resource "azurerm_network_security_rule" "httprule" {
+  name                        = "${var.prefix}-nsgrule8080"
+  network_security_group_name = azurerm_network_security_group.main.name
+  resource_group_name = azurerm_resource_group.main.name
+  priority                    = 101
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "8080"
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
 }
