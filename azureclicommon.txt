@@ -3,3 +3,8 @@ systemctl status jenkins
 
 
 ansible-playbook -i inventory/hosts.yml site.yml --ask-become-pass
+
+
+apt-get install mysql-client
+
+mysql -h db-mysql-hhhinjxlco.mysql.database.azure.com -u hhhinjxlco -p

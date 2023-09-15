@@ -24,12 +24,22 @@ provider "azurerm" {
 }
 
 
-# generate a random prefix
+# generate a random string
 resource "random_string" "azustring" {
   length  = 10
   special = false
   upper   = false
   numeric  = false
+}
+
+# generate a random pwd
+resource "random_password" "password" {
+  length      = 16
+  min_lower   = 1
+  min_upper   = 1
+  min_numeric = 1
+  min_special = 1
+  special     = true
 }
 
 resource "azurerm_resource_group" "azurg" {
@@ -43,7 +53,7 @@ resource "azurerm_resource_group" "azurg" {
 
 # Virtual network 
 resource "azurerm_virtual_network" "azuvnet" {
-  name                = "virtualNetwork1"
+  name                = "vnet-${terraform.workspace}-${random_string.azustring.result}"
   resource_group_name = azurerm_resource_group.azurg.name
   location            = azurerm_resource_group.azurg.location
   address_space       = ["10.0.0.0/16"]
@@ -56,50 +66,33 @@ resource "azurerm_virtual_network" "azuvnet" {
 
 # Subnet for web servers
 resource "azurerm_subnet" "azupublicsubnet" {
-  name                 = "publicsubnet"
-  resource_group_name  = azurerm_resource_group.azurg.name
-  virtual_network_name = azurerm_virtual_network.azuvnet.name
-  address_prefixes     = ["10.0.0.0/24"]
-}
-
-# Subnet for dbs
-resource "azurerm_subnet" "azuprivatesubnet" {
-  name                 = "privatesubnet"
+  name                 = "pubsub-${terraform.workspace}-${random_string.azustring.result}"
   resource_group_name  = azurerm_resource_group.azurg.name
   virtual_network_name = azurerm_virtual_network.azuvnet.name
   address_prefixes     = ["10.0.1.0/24"]
 }
 
-# Public IP for web server
-resource "azurerm_public_ip" "azuvmpip" {
-  name                = "vm-pip"
-  resource_group_name = azurerm_resource_group.azurg.name
-  location            = azurerm_resource_group.azurg.location
-  allocation_method   = "Dynamic"
+# Subnet for dbs
+resource "azurerm_subnet" "azuprivatesubnet" {
+  name                 = "prisub-${terraform.workspace}-${random_string.azustring.result}"
+  resource_group_name  = azurerm_resource_group.azurg.name
+  virtual_network_name = azurerm_virtual_network.azuvnet.name
+  address_prefixes     = ["10.0.2.0/24"]
 
-  tags = {
-    environment = "${terraform.workspace}"
+  delegation {
+    name = "fs"
+    service_delegation {
+      name = "Microsoft.DBforMySQL/flexibleServers"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action",
+      ]
+    }
   }
 }
-
-// NIC
-resource "azurerm_network_interface" "azuwebnic" {
-  name                = "web-nic"
-  resource_group_name = azurerm_resource_group.azurg.name
-  location            = azurerm_resource_group.azurg.location
-
-  ip_configuration {
-    name                          = "primary"
-    subnet_id                     = azurerm_subnet.azupublicsubnet.id
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.azuvmpip.id
-  }
-}
-
 
 # NSG for pubsubnet
 resource "azurerm_network_security_group" "azunsgpubsubnet" {
-  name                = "webnsg"
+  name                = "nsg-web-${terraform.workspace}-${random_string.azustring.result}"
   resource_group_name = azurerm_resource_group.azurg.name
   location            = azurerm_resource_group.azurg.location
 
@@ -116,57 +109,59 @@ resource "azurerm_network_security_group" "azunsgpubsubnet" {
   }
 }
 
-# NSG for privatesubnet
-resource "azurerm_network_security_group" "azunsgprivatesubnet" {
-  name                = "dbnsg"
-  resource_group_name = azurerm_resource_group.azurg.name
-  location            = azurerm_resource_group.azurg.location
-
-  security_rule {
-    name                       = "sqlrule"
-    priority                   = 1000
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "1433"
-    source_address_prefix      = "10.0.0.0/24"
-    destination_address_prefix = "*"
-  }
-}
-
-
-resource "azurerm_subnet_network_security_group_association" "webfe-nsgass-01" {
+# Associate nsgs to subnets
+resource "azurerm_subnet_network_security_group_association" "nsg_ass_pubsub" {
   subnet_id                 = azurerm_subnet.azupublicsubnet.id
   network_security_group_id = azurerm_network_security_group.azunsgpubsubnet.id
 }
 
-resource "azurerm_subnet_network_security_group_association" "db-nsgass-01" {
-  subnet_id                 = azurerm_subnet.azuprivatesubnet.id
-  network_security_group_id = azurerm_network_security_group.azunsgprivatesubnet.id
+# Public IP for web server
+resource "azurerm_public_ip" "azuvmpip" {
+  name                = "pip-${terraform.workspace}-${random_string.azustring.result}"
+  resource_group_name = azurerm_resource_group.azurg.name
+  location            = azurerm_resource_group.azurg.location
+  allocation_method   = "Dynamic"
+
+  tags = {
+    environment = "${terraform.workspace}"
+  }
 }
 
-# Vm linx
+// NIC
+resource "azurerm_network_interface" "azuwebnic" {
+  name                = "nic-${terraform.workspace}-${random_string.azustring.result}"
+  resource_group_name = azurerm_resource_group.azurg.name
+  location            = azurerm_resource_group.azurg.location
+
+  ip_configuration {
+    name                          = "primary"
+    subnet_id                     = azurerm_subnet.azupublicsubnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.azuvmpip.id
+  }
+}
+
+# Vm linux
 resource "azurerm_linux_virtual_machine" "main" {
   name                            = "vm-${random_string.azustring.result}"
   resource_group_name             = azurerm_resource_group.azurg.name
   location                        = azurerm_resource_group.azurg.location
-  size                            = "Standard_D1_v2"
-  admin_username                  = "azureuser"
+  size                            = var.vm_size
+  admin_username                  = var.vm_username
   network_interface_ids = [
     azurerm_network_interface.azuwebnic.id,
   ]
 
   admin_ssh_key {
-    username = "azureuser"
-    public_key = file("~/.ssh/nnkhanh-GitHub.pub")
+    username = var.vm_username
+    public_key = file("${var.vm_public_key}")
   }
 
   source_image_reference {
-    publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
-    version   = "latest"
+    publisher = var.vm_publisher
+    offer     = var.vm_offer
+    sku       = var.vm_sku
+    version   = var.vm_version
   }
 
   os_disk {
@@ -175,16 +170,39 @@ resource "azurerm_linux_virtual_machine" "main" {
   }
 }
 
-# Create managed instance
-resource "azurerm_mssql_managed_instance" "main" {
-  name                         = "mssql1"
+# Enables you to manage Private DNS zones within Azure DNS
+resource "azurerm_private_dns_zone" "default" {
+  name                        = "${random_string.azustring.result}.mysql.database.azure.com"
+  resource_group_name         = azurerm_resource_group.azurg.name
+}
+
+# Enables you to manage Private DNS zone Virtual Network Links
+resource "azurerm_private_dns_zone_virtual_network_link" "default" {
+  name                        = "mysql_dns_vnet_link${random_string.azustring.result}.com"
+  private_dns_zone_name       = azurerm_private_dns_zone.default.name
+  resource_group_name         = azurerm_resource_group.azurg.name
+  virtual_network_id          = azurerm_virtual_network.azuvnet.id
+}
+
+# Create myql
+resource "azurerm_mysql_flexible_server" "my_sql" {
+  name                         = "db-mysql-${random_string.azustring.result}"
   resource_group_name          = azurerm_resource_group.azurg.name
   location                     = azurerm_resource_group.azurg.location
-  subnet_id                    = azurerm_subnet.azuprivatesubnet.id
-  administrator_login          = "missadministrator"
-  administrator_login_password = "thisIsKat11"
-  license_type                 = "BasePrice"
-  sku_name                     = "GP_Gen5"
-  vcores                       = "4"
-  storage_size_in_gb           = "32"
+  administrator_login          = random_string.azustring.result
+  administrator_password       = random_password.password.result
+  geo_redundant_backup_enabled = false
+  backup_retention_days        = 7
+  private_dns_zone_id          = azurerm_private_dns_zone.default.id
+  delegated_subnet_id          = azurerm_subnet.azuprivatesubnet.id
+  sku_name                     = "GP_Standard_D2ds_v4"
+  version                      = "8.0.21"
+  zone                         = "1"
+
+  storage {
+    iops    = 360
+    size_gb = 20
+  }
+
+  depends_on = [azurerm_private_dns_zone_virtual_network_link.default]
 }
