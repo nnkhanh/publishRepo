@@ -1,9 +1,8 @@
 ---
-- name: Install Jenkins
+- name: Install Jenkins, Terraform
   hosts: ciservers
-  gather_facts: false
   become: true
-  tasks:
-  - import_role:
-      name: jenkins
+  roles:
+    - name: jenkins
+    - name: terraform
 ...

@@ -1,17 +1,22 @@
-# Copyright (c) HashiCorp, Inc.
-# SPDX-License-Identifier: MPL-2.0
-
 provider "azurerm" {
   features {}
 }
 
+# generate a random string
+resource "random_string" "azustring" {
+  length  = 10
+  special = false
+  upper   = false
+  numeric  = false
+}
+
 resource "azurerm_resource_group" "main" {
-  name     = "${var.prefix}-resources"
+  name     = "RG-${random_string.azustring.result}"
   location = var.location
 }
 
 resource "azurerm_virtual_network" "main" {
-  name                = "${var.prefix}-network"
+  name                = "vnet-${random_string.azustring.result}"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
@@ -25,14 +30,14 @@ resource "azurerm_subnet" "internal" {
 }
 
 resource "azurerm_public_ip" "pip" {
-  name                = "${var.prefix}-pip"
+  name                = "pip-${random_string.azustring.result}"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   allocation_method   = "Dynamic"
 }
 
 resource "azurerm_network_interface" "main" {
-  name                = "${var.prefix}-nic"
+  name                = "nic-${random_string.azustring.result}"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
 
@@ -45,13 +50,13 @@ resource "azurerm_network_interface" "main" {
 }
 
 resource "azurerm_network_security_group" "main" {
-  name                = "${var.prefix}-nsg"
+  name                = "nsg--${random_string.azustring.result}"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
 }
 
 resource "azurerm_network_security_rule" "sshrule" {
-  name                        = "${var.prefix}-nsgrule22"
+  name                        = "myssh"
   network_security_group_name = azurerm_network_security_group.main.name
   resource_group_name = azurerm_resource_group.main.name
   priority                    = 100
@@ -65,7 +70,7 @@ resource "azurerm_network_security_rule" "sshrule" {
 }
 
 resource "azurerm_network_security_rule" "httprule" {
-  name                        = "${var.prefix}-nsgrule8080"
+  name                        = "myhttp8080"
   network_security_group_name = azurerm_network_security_group.main.name
   resource_group_name = azurerm_resource_group.main.name
   priority                    = 101
@@ -84,7 +89,7 @@ resource "azurerm_subnet_network_security_group_association" "main" {
 }
 
 resource "azurerm_linux_virtual_machine" "main" {
-  name                            = "${var.prefix}-vm"
+  name                            = "vm-${random_string.azustring.result}"
   resource_group_name             = azurerm_resource_group.main.name
   location                        = azurerm_resource_group.main.location
   size                            = "Standard_DS1_v2"
@@ -95,7 +100,7 @@ resource "azurerm_linux_virtual_machine" "main" {
 
   admin_ssh_key {
     username = "azureuser"
-    public_key = file("~/.ssh/azure_key.pub")
+    public_key = file("~/.ssh/nnkhanh-GitHub.pub")
   }
 
   source_image_reference {

@@ -1,13 +1,15 @@
-# Copyright (c) HashiCorp, Inc.
-# SPDX-License-Identifier: MPL-2.0
-
 terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.71"
+      version = ">= 3.71"
+    }
+    random = {
+      source = "hashicorp/random"
+      version = ">= 3.0"
     }
   }
+  
   backend "azurerm" {
         resource_group_name  = "DevOpsTraining"
         storage_account_name = "tfstate96"
@@ -26,35 +28,43 @@ provider "azurerm" {
   #client_secret     = ""
 }
 
-resource "azurerm_resource_group" "example" {
-  name     = "${var.prefix}-resources"
+# generate a random string
+resource "random_string" "azustring" {
+  length  = 10
+  special = false
+  upper   = false
+  numeric  = false
+}
+
+resource "azurerm_resource_group" "main" {
+  name     = "RG-${random_string.azustring.result}"
   location = var.location
 }
 
-resource "azurerm_virtual_network" "example" {
-  name                = "${var.prefix}-network"
-  resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
+resource "azurerm_virtual_network" "main" {
+  name                = "vnet-${random_string.azustring.result}"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
   address_space       = ["10.0.0.0/16"]
 }
 
 resource "azurerm_subnet" "frontend" {
-  name                 = "frontend"
-  virtual_network_name = azurerm_virtual_network.example.name
-  resource_group_name  = azurerm_resource_group.example.name
+  name                 = "subnet-fe-${random_string.azustring.result}"
+  virtual_network_name = azurerm_virtual_network.main.name
+  resource_group_name  = azurerm_resource_group.main.name
   address_prefixes     = ["10.0.1.0/24"]
 }
 
 resource "azurerm_subnet" "backend" {
-  name                 = "backend"
-  virtual_network_name = azurerm_virtual_network.example.name
-  resource_group_name  = azurerm_resource_group.example.name
+  name                 = "subnet-be-${random_string.azustring.result}"
+  virtual_network_name = azurerm_virtual_network.main.name
+  resource_group_name  = azurerm_resource_group.main.name
   address_prefixes     = ["10.0.2.0/24"]
 }
 
 resource "azurerm_subnet" "database" {
-  name                 = "database"
-  virtual_network_name = azurerm_virtual_network.example.name
-  resource_group_name  = azurerm_resource_group.example.name
+  name                 = "subnet-db-${random_string.azustring.result}"
+  virtual_network_name = azurerm_virtual_network.main.name
+  resource_group_name  = azurerm_resource_group.main.name
   address_prefixes     = ["10.0.3.0/24"]
 }

@@ -1,10 +1,28 @@
+#!/bin/bash
+
+RESOURCE_GROUP_NAME=DevOpsTraining
+STORAGE_ACCOUNT_NAME=tfstate$RANDOM
+CONTAINER_NAME=tfstate
+
+# Create resource group
+az group create --name $RESOURCE_GROUP_NAME --location eastus
+
+# Create storage account
+az storage account create --resource-group $RESOURCE_GROUP_NAME --name $STORAGE_ACCOUNT_NAME --sku Standard_LRS --encryption-services blob
+
+# Create blob container
+az storage container create --name $CONTAINER_NAME --account-name $STORAGE_ACCOUNT_NAME
+
+
+export ARM_ACCESS_KEY=$(az keyvault secret show --name terraform-backend-key --vault-name devopstraining --query value -o tsv)
+
+az storage account show -g DevOpsTraining -n tfstate96
+
+sudo apt-get install mysql-client
+
+mysql -h db-mysql-hhhinjxlco.mysql.database.azure.com -u hhhinjxlco -p
+terraform apply -var-file=”prod.tfvars”
 sudo journalctl -u jenkins
 systemctl status jenkins
 
-
 ansible-playbook -i inventory/hosts.yml site.yml --ask-become-pass
-
-
-apt-get install mysql-client
-
-mysql -h db-mysql-hhhinjxlco.mysql.database.azure.com -u hhhinjxlco -p

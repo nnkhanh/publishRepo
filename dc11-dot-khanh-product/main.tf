@@ -4,6 +4,11 @@ terraform {
       source  = "hashicorp/azurerm"
       version = ">= 3.71"
     }
+    
+    random = {
+      source = "hashicorp/random"
+      version = ">= 3.0"
+    }
   }
   backend "azurerm" {
         resource_group_name  = "DevOpsTraining"

@@ -1,4 +1,7 @@
 ---
   jenkinrepo: deb https://pkg.jenkins.io/debian-stable binary/
   jenkinkey: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+
+  terraform_pkg_url: https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip
+  terraform_path: /usr/local/bin/
 ...
