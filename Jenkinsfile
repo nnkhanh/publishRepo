@@ -3,6 +3,6 @@ node {
 		checkout scm
 
 	stage 'Build'
-		bat 'terraform validate'
-		bat 'terraform fmt'
+		sh 'terraform validate'
+		sh 'terraform fmt'
 }
