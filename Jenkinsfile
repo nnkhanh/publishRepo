@@ -1,10 +1,11 @@
 node {
-	stage 'Checkout'
-		checkout scm
-	
+	stage 'Checkout' {
+	        checkout scm
+	}
 	/* .. snip .. */
 	
-	stage 'Build'
+	stage 'Build' {
 		sh 'terraform validate'
 		sh 'terraform fmt'
+	}
 }
