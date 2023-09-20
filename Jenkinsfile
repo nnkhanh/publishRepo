@@ -2,7 +2,7 @@ node {
 	stage 'Checkout'
 		checkout scm
 	
-	/* .. snip .. tst*/
+	/* .. snip .. */
 	
 	stage 'Build'
 		sh 'terraform validate'
