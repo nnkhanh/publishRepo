@@ -6,9 +6,11 @@ node {
 	/* .. snip ..2 */
 	
 	stage ('Build') {
+
 		dir('linux-basic-ssh') {
-      			sh "pwd"
+      			sh "pwd && ls"
 		}		
+
 		sh 'terraform init'
 		sh 'terraform validate'
 	}
