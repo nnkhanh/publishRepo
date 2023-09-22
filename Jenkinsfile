@@ -3,7 +3,7 @@ node {
 	        checkout scm
 	}
 	
-	/* .. snip ..1 */
+	/* .. snip ..2 */
 	
 	stage ('Build') {
 		sh 'cd linux-basic-ssh'
