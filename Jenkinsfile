@@ -1,6 +1,7 @@
 node {
-	stage 'Checkout'
-		checkout scm
+	stage ('Checkout') {
+	        checkout scm
+	}
 	
 	/* .. snip .. */
 	
@@ -8,4 +9,5 @@ node {
 		sh 'cd linux-basic-ssh'
 		sh 'terraform validate'
 		sh 'terraform fmt'
+	}
 }
