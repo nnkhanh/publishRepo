@@ -7,12 +7,13 @@ node {
 	
 	stage ('Build') {
 		sh 'cd linux-basic-ssh'
+		sh 'pwd && ls'
+		sh 'terraform init'
 		sh 'terraform validate'
-		sh 'terraform fmt'
 	}
 
 	stage ('Apply') {
-		sh 'terraform init'
+		sh 'terraform plan'
 		sh 'terraform apply -auto-approve'
 	}
 
