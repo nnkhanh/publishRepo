@@ -1,1 +1,1 @@
-location = "southeastasia"
+"location" : "southeastasia"

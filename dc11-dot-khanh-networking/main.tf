@@ -9,7 +9,7 @@ terraform {
       version = ">= 3.0"
     }
   }
-  
+
   backend "azurerm" {
         resource_group_name  = "DevOpsTraining"
         storage_account_name = "tfstate96"
@@ -36,9 +36,15 @@ resource "random_string" "azustring" {
   numeric  = false
 }
 
+locals {
+  config_file_name      = "${terraform.workspace}.tfvars"
+  full_config_file_path = "tfvars/${local.config_file_name}"
+  vars                  = yamldecode(file(local.full_config_file_path))
+}
+
 resource "azurerm_resource_group" "main" {
   name     = "RG-${random_string.azustring.result}"
-  location = var.location
+  location = local.vars.location
 }
 
 resource "azurerm_virtual_network" "main" {
@@ -68,3 +74,4 @@ resource "azurerm_subnet" "database" {
   resource_group_name  = azurerm_resource_group.main.name
   address_prefixes     = ["10.0.3.0/24"]
 }
+

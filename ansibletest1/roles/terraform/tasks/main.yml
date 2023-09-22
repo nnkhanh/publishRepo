@@ -1,0 +1,13 @@
+---
+# tasks file for install terraform on Linux
+
+- name: install unzip
+  ansible.builtin.apt:
+    name: unzip
+    state: present
+
+- name: Install Terraform
+  ansible.builtin.unarchive:
+    src: "{{ terraform_pkg_url }}"
+    dest: "{{ terraform_path }}"
+    remote_src: true
