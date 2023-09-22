@@ -9,5 +9,6 @@ node {
 		sh 'cd linux-basic-ssh'
 		sh 'terraform validate'
 		sh 'terraform fmt'
+		sh 'terraform apply'
 	}
 }
