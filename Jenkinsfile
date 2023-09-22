@@ -9,10 +9,10 @@ node {
 		sh 'cd linux-basic-ssh'
 		sh 'terraform validate'
 		sh 'terraform fmt'
-		sh 'terraform apply'
 	}
 
-	stage ('Apply') {		
+	stage ('Apply') {
+		sh 'terraform plan'
 		sh 'terraform apply'
 	}
 }
