@@ -11,4 +11,8 @@ node {
 		sh 'terraform fmt'
 		sh 'terraform apply'
 	}
+
+	stage ('Apply') {		
+		sh 'terraform apply'
+	}
 }
