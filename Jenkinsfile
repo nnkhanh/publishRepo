@@ -12,7 +12,11 @@ node {
 	}
 
 	stage ('Apply') {
-		sh 'terraform plan'
-		sh 'terraform apply'
+		sh 'terraform init'
+		sh 'terraform apply -auto-approve'
+	}
+
+	stage ('Destroy') {
+		sh 'terraform destroy -auto-approve'
 	}
 }
