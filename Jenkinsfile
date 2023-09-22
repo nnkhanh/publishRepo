@@ -3,9 +3,9 @@ node {
 	        checkout scm
 	}
 	
-	/* .. snip .. */
+	/* .. snip ..1 */
 	
-	stage 'Build'
+	stage ('Build') {
 		sh 'cd linux-basic-ssh'
 		sh 'terraform validate'
 		sh 'terraform fmt'
