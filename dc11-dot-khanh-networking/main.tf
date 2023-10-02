@@ -19,8 +19,6 @@ terraform {
     }
 }
 
-kaa
-
 provider "azurerm" {
   features {}
 
@@ -29,8 +27,6 @@ provider "azurerm" {
   #client_id         = "361f772c-d4ae-43fc-8e46-9d9ab5a2db26"
   #client_secret     = ""
 }
-
-kaka
 
 # generate a random string
 resource "random_string" "azustring" {
