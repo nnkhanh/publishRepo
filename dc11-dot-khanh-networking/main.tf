@@ -28,6 +28,8 @@ provider "azurerm" {
   #client_secret     = ""
 }
 
+kaka
+
 # generate a random string
 resource "random_string" "azustring" {
   length  = 10
