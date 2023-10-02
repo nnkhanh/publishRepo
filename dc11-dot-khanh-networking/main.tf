@@ -19,6 +19,8 @@ terraform {
     }
 }
 
+kaa
+
 provider "azurerm" {
   features {}
 
