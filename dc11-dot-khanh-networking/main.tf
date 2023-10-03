@@ -18,7 +18,7 @@ terraform {
         #access_key = ""        
     }
 }
-kk
+
 provider "azurerm" {
   features {}
 
