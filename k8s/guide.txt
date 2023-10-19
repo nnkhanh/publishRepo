@@ -1,0 +1,26 @@
+az group create --name RG-DevOpsTraining --location southeastasia
+az acr create --resource-group RG-DevOpsTraining --name acrdockercoin --sku Basic
+
+az acr login --name acrdockercoin
+az acr list --resource-group RG-DevOpsTraining --query "[].{acrLoginServer:loginServer}" --output table
+
+Docker images
+docker tag dockercoins-hasher acrdockercoin.azurecr.io/dockercoins-hasher:v1
+docker push acrdockercoin.azurecr.io/dockercoins-hasher:v1
+
+az acr repository list --name acrdockercoin --output table
+
+
+az aks create \
+    --resource-group RG-DevOpsTraining \
+    --name myAKSCluster \
+    --node-count 2 \
+    --generate-ssh-keys \
+    --attach-acr acrdockercoin
+
+
+az aks install-cli
+az aks get-credentials --resource-group RG-DevOpsTraining --name myAKSCluster
+kubectl get nodes
+kubectl apply -f dockercoins.yaml
+kubectl get service webui --watch
