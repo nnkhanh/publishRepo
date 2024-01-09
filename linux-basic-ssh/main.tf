@@ -7,7 +7,7 @@ resource "random_string" "azustring" {
   length  = 10
   special = false
   upper   = false
-  numeric  = false
+  numeric  = true
 }
 
 resource "azurerm_resource_group" "main" {
@@ -70,7 +70,7 @@ resource "azurerm_network_security_rule" "sshrule" {
 }
 
 resource "azurerm_network_security_rule" "httprule" {
-  name                        = "myhttp8080"
+  name                        = "myhttpport8080"
   network_security_group_name = azurerm_network_security_group.main.name
   resource_group_name = azurerm_resource_group.main.name
   priority                    = 101
